@@ -1,92 +1,107 @@
 <template>
-  <v-sheet class="mx-auto" width="300">
-    <v-form ref="formRef">
-      <v-text-field
-        v-model="name"
-        :counter="10"
-        :rules="nameRules"
-        label="用户名"
-        required
-      ></v-text-field>
+  <v-container fluid fill-height>
+    <v-row align="center" justify="center">
+      <v-col sm="8" md="4">
+        <v-sheet elevation="2" rounded>
+          <v-form ref="formRef" v-model="isFormValid" lazy-validation>
+            <v-card>
+              <v-card-title class="text-h5 text-center">
+                用户登录
+              </v-card-title>
+              <v-card-text>
+                <v-text-field
+                  v-model="name"
+                  :counter="10"
+                  :rules="nameRules"
+                  label="用户名"
+                  required
+                ></v-text-field>
 
-      <v-text-field
-        v-model="password"
-        type="password"
-        :rules="passwordRules"
-        :counter="16"
-        label="密码"
-        required
-      ></v-text-field>
+                <v-text-field
+                  v-model="password"
+                  type="password"
+                  :rules="passwordRules"
+                  :counter="16"
+                  label="密码"
+                  required
+                ></v-text-field>
+              </v-card-text>
 
-      <div class="d-flex flex-column">
-        <v-btn class="mt-4" color="success" block @click="handleLogin">
-          登录
-        </v-btn>
+              <v-card-actions>
+                <v-btn
+                  color="success"
+                  block
+                  @click="handleLogin"
+                  :disabled="!isFormValid"
+                >
+                  登录
+                </v-btn>
+              </v-card-actions>
+            </v-card>
 
-        <!-- <span>
-          注册
-        </span> -->
-      </div>
-    </v-form>
-  </v-sheet>
+            <v-divider class="my-3"></v-divider>
+
+            <p class="text-center">
+              还没有账户？
+              <v-btn text @click="goToRegister">点击这里注册</v-btn>
+            </p>
+            <p class="text-center mt-2">
+              忘记密码？
+              <v-btn text @click="goToResetPassword">找回密码</v-btn>
+            </p>
+          </v-form>
+        </v-sheet>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script>
-import { defineComponent, ref } from "vue";
-import useAuth from "@/api/auth";
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import useAuth from "@/composables/useAuth";
 
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const { login } = useAuth();
+const router = useRouter();
+const { login } = useAuth();
 
-    // 使用 ref 创建响应式状态
-    const name = ref("");
-    const password = ref(null);
-    const checkbox = ref(false);
-    const formRef = ref(null); // 表单的响应式引用
+const isFormValid = ref(false);
+const name = ref("");
+const password = ref(null);
+const formRef = ref(null); // 表单的响应式引用
 
-    // 验证规则
-    const nameRules = [
-      (v) => !!v || "请填写用户名",
-      (v) => (v && v.length > 3) || "用户名至少有4个字符",
-    ];
+// 验证规则
+const nameRules = [
+  (v) => !!v || "请填写用户名",
+  (v) => (v && v.length > 3) || "用户名至少有4个字符",
+];
 
-    const passwordRules = [
-      (v) => !!v || "请填写密码",
-      (v) => (v && v.length > 5) || "密码长度至少有6个字符",
-    ];
+const passwordRules = [
+  (v) => !!v || "请填写密码",
+  (v) => (v && v.length > 5) || "密码长度至少有6个字符",
+  (v) => (v && v.length < 17) || "密码长度过长",
+];
 
-    // 登录方法
-    const handleLogin = async () => {
-      const { valid } = await formRef.value.validate(); // 通过表单引用进行验证
+// 登录方法
+const handleLogin = async () => {
+  console.log("formRef", formRef);
+  const { valid } = await formRef.value.validate(); // 通过表单引用进行验证
 
-      if (valid) {
-        await login(name.value, password.value); // 调用登录 API
-      }
-    };
+  if (valid) {
+    await login(name.value, password.value); // 调用登录 API
+  }
+};
 
-    // 表单重置
-    const reset = () => {
-      formRef.value.reset(); // 重置表单
-    };
+const goToRegister = () => {
+  router.push("/register"); // 路由跳转到注册页面
+};
 
-    // 重置验证状态
-    const resetValidation = () => {
-      formRef.value.resetValidation(); // 重置验证状态
-    };
-
-    return {
-      name,
-      password,
-      checkbox,
-      formRef, // 返回表单引用
-      nameRules,
-      passwordRules,
-      handleLogin,
-      reset,
-      resetValidation,
-    };
-  },
-});
+const goToResetPassword = () => {
+  router.push("/reset-password"); // 路由跳转到找回密码页面
+};
 </script>
+<style scoped>
+.v-card {
+  padding: 20px;
+  /* 为表单添加内边距 */
+}
+</style>

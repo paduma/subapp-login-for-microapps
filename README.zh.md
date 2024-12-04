@@ -1,3 +1,4 @@
+[English](./README.md) | 简体中文
 # Subapp-Login  
 
 Subapp-Login 是一个微应用（microapp），专注于用户注册及登录功能。作为主应用的一部分，它与 [main-app](https://github.com/paduma/main-app-for-microapps) 结合，提供全面的用户身份管理体验。  
